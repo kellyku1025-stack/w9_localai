@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>國中九年級自然科【功與能】互動教學網站</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: "Microsoft JhengHei", "微軟正黑體", "PingFang TC", "Noto Sans TC", "Segoe UI", sans-serif;
+    background: #f4f7fa; color: #333; line-height: 1.7;
+  }
+  header.header {
+    background: linear-gradient(135deg, #1f3a5f 0%, #2e86ab 100%);
+    color: #fff; padding: 2.2rem 1rem; text-align: center;
+  }
+  header.header h1 { font-size: 1.9rem; margin-bottom: 0.4rem; line-height: 1.3; }
+  header.header p { font-size: 1.05rem; opacity: 0.95; }
+  nav.tabs {
+    display: flex; justify-content: center; background: #34495e;
+    position: sticky; top: 0; z-index: 200; border-bottom: 4px solid #1f3a5f; flex-wrap: wrap;
+  }
+  nav.tabs .tab {
+    flex: 1 1 auto; min-width: 130px; padding: 1rem 0.5rem; background: #34495e;
+    color: #cfd8dc; border: none; outline: none; cursor: pointer; font-size: 1rem;
+    font-weight: 600; transition: all 0.25s; border-bottom: 3px solid transparent;
+  }
+  nav.tabs .tab:hover { background: #40566e; color: #fff; }
+  nav.tabs .tab.active { background: #e67e22; color: #fff; border-bottom: 3px solid #d35400; box-shadow: inset 0 2px 6px rgba(0,0,0,0.15); }
+  .container { max-width: 1080px; margin: 0 auto; padding: 1.6rem 1rem; }
+  .tab-content { display: none; animation: fadeIn 0.45s ease; }
+  .tab-content.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .card {
+    background: #fff; border-radius: 14px; padding: 1.6rem; margin-bottom: 1.6rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06); border: 1px solid #e3eaf0;
+  }
+  h2 {
+    color: #1f3a5f; margin-bottom: 0.9rem; font-size: 1.45rem;
+    border-left: 6px solid #e67e22; padding-left: 0.9rem;
+  }
+  h3 { color: #2e86ab; margin: 1.1rem 0 0.5rem; font-size: 1.15rem; }
+  p { margin-bottom: 0.85rem; }
+  ul { margin: 0.5rem 0 1rem 1.6rem; }
+  li { margin-bottom: 0.4rem; }
+  .formula {
+    background: #fdf2e9; border: 1px dashed #e67e22; border-radius: 10px;
+    padding: 1.1rem; margin: 1.1rem 0; text-align: center;
+    font-size: 1.35rem; font-weight: 800; color: #c05621;
+  }
+  .formula small { font-size: 0.85rem; font-weight: 600; color: #8a6d3b; display: block; margin-top: 0.3rem; }
+  .sim-area {
+    background: #fbfdfe; border: 2px dashed #b9c6d2; border-radius: 12px;
+    padding: 1.2rem; text-align: center; margin: 1.2rem 0;
+  }
+  canvas { background: #fff; border: 1px solid #d5dee6; border-radius: 8px; max-width: 100%; display: block; margin: 0 auto; }
+  .controls { margin: 1.1rem 0; display: flex; gap: 0.9rem; flex-wrap: wrap; justify-content: center; align-items: center; }
+  .controls label { font-size: 0.95rem; color: #4a5568; display: flex; align-items: center; gap: 0.5rem; }
+  .controls input[type="range"] { width: 150px; cursor: pointer; }
+  button {
+    background: #27ae60; color: #fff; border: none; padding: 0.65rem 1.3rem;
+    border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 700;
+    transition: background 0.2s, transform 0.1s;
+  }
+  button:hover:not(:disabled) { background: #1e9e4e; }
+  button:active:not(:disabled) { transform: scale(0.97); }
+  button:disabled { background: #9aa5b1; cursor: not-allowed; }
+  .btn-check { background: #2e86ab; margin-top: 1rem; }
+  .btn-check:hover { background: #246b8a; }
+  .btn-reset { background: #7f8c8d; margin-left: 0.5rem; }
+  .btn-reset:hover { background: #636e72; }
+  .result {
+    margin-top: 1rem; padding: 1rem; border-radius: 10px;
+    background: #e8f6f3; border-left: 6px solid #1abc9c;
+    color: #16a085; font-weight: 700; min-height: 3rem;
+    display: flex; align-items: center; line-height: 1.6;
+  }
+  .quiz-card { background: #fff; border-radius: 12px; padding: 1.5rem; border: 1px solid #e3eaf0; }
+  .question { margin-bottom: 1.4rem; padding-bottom: 1rem; border-bottom: 1px dashed #dfe4ea; }
+  .question:last-child { border-bottom: none; }
+  .question strong { color: #1f3a5f; }
+  .options { margin-top: 0.5rem; }
+  .options label {
+    display: block; margin: 0.45rem 0; padding: 0.55rem 0.9rem; border-radius: 8px;
+    border: 2px solid #dfe4ea; cursor: pointer; transition: all 0.18s; font-size: 0.98rem;
+  }
+  .options label:hover { background: #f3f7fb; border-color: #2e86ab; color: #1f3a5f; }
+  input[type="radio"] { margin-right: 0.65rem; transform: scale(1.15); accent-color: #e67e22; }
+  .feedback {
+    margin-top: 0.6rem; padding: 0.75rem; border-radius: 8px;
+    display: none; font-weight: 700; font-size: 0.98rem;
+  }
+  .feedback.correct { display: block; background: #d4edda; color: #1e7e34; border: 1px solid #1e7e34; }
+  .feedback.wrong { display: block; background: #f8d7da; color: #b23a3a; border: 1px solid #b23a3a; }
+  .score-box { margin-top: 1.2rem; padding: 1rem; border-radius: 10px; background: #eef2f7; border: 1px dashed #adb5bd; font-weight: 800; color: #2c3e50; min-height: 2rem; display: flex; align-items: center; }
+  table { width: 100%; border-collapse: collapse; margin: 1.1rem 0; font-size: 0.95rem; }
+  th, td { border: 1px solid #cfd8dc; padding: 0.75rem; text-align: left; }
+  th { background: #1f3a5f; color: #fff; }
+  tr:nth-child(even) { background: #f6f9fb; }
+  .badge {
+    display: inline-block; padding: 0.15rem 0.65rem; border-radius: 12px; font-size: 0.8rem;
+    font-weight: 700; margin-right: 0.4rem; vertical-align: middle;
+  }
+  .badge.renewable { background: #2ecc71; color: #fff; }
+  .badge.nonrenewable { background: #e74c3c; color: #fff; }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin: 1rem 0; }
+  .energy-card { border: 1px solid #dde3ea; border-radius: 10px; padding: 1rem; background: #fff; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; text-align: center; }
+  .energy-card:hover { transform: translateY(-3px); box-shadow: 0 6px 14px rgba(0,0,0,0.08); border-color: #2e86ab; }
+  .energy-card h4 { margin-bottom: 0.5rem; color: #1f3a5f; font-size: 1.05rem; }
+  footer.footer {
+    text-align: center; padding: 2.5rem 1rem; color: #6c7a89; font-size: 0.9rem;
+    border-top: 1px solid #dde3ea; margin-top: 2rem; background: #fff;
+  }
+  footer.footer b { color: #1f3a5f; }
+  .note { background: #fffbeb; border: 1px dashed #d9b55f; border-radius: 8px; padding: 0.9rem; margin: 0.9rem 0; font-size: 0.95rem; color: #7a6200; }
+  .tip { background: #e3f2fd; border-left: 5px solid #2e86ab; padding: 0.8rem 1rem; margin: 0.8rem 0; border-radius: 0 8px 8px 0; font-size: 0.95rem; color: #1565c0; }
+  @media (max-width: 768px) {
+    .container { padding: 1rem 0.6rem; }
+    nav.tabs .tab { padding: 0.8rem 0.3rem; font-size: 0.88rem; min-width: 110px; }
+    .controls { flex-direction: column; align-items: stretch; }
+    .controls input[type="range"] { width: 100%; }
+    header.header h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <h1>📘 國中九年級自然科【功與能】單元</h1>
+  <p>翰林版 · 互動式教學、模擬與練習網站 · 離線開啟也能完整使用</p>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" onclick="openTab(0, this)">1. 功與功率</button>
+  <button class="tab" onclick="openTab(1, this)">2. 動能與位能</button>
+  <button class="tab" onclick="openTab(2, this)">3. 能量守恆定律與能源</button>
+  <button class="tab" onclick="openTab(3, this)">4. 簡單機械</button>
+  <button class="tab" onclick="openTab(4, this)">5. 重點總整理</button>
+</nav>
+
+<div class="container">
+
+  <!-- ==================== 1. 功與功率 ==================== -->
+  <section class="tab-content active" id="tab0">
+    <div class="card">
+      <h2>1. 功與功率</h2>
+      <p>在自然科中，「功」不是指做功課，而是物理上的專有名詞。</p>
+      <p><strong>什麼是功？</strong> 當一個力作用在物體上，並且物體沿著力的方向發生位移，我們就說這個力對物體「做了功」。</p>
+      <div class="formula">W = F × s<span>（功 = 力 × 位移，力與位移同方向）</span></div>
+      <ul>
+        <li>做功的條件：(1) 對物體施加力；(2) 物體發生位移；(3) 力與位移方向相同。</li>
+        <li>如果牆壁被用力推卻沒有移動，或是力與運動方向垂直，就不會做功。</li>
+        <li>功的單位是「焦耳 (J)」：1 J = 1 N·m（1 牛頓力移動 1 米）。</li>
+      </ul>
+      <p><strong>什麼是功率？</strong> 功率表示「做功的快慢」，做得越快，功率越大。</p>
+      <div class="formula">P = W ÷ t<span>（功率 = 功 ÷ 時間）</span></div>
+      <ul>
+        <li>功率的單位是「瓦特 (W)」：1 W = 1 J/s。</li>
+        <li>生活例子：同樣舉起書本，較快舉起的人輸出功率較大。</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>🔧 互動模擬：推箱子實驗</h3>
+      <div class="sim-area">
+        <canvas id="sim1" width="560" height="220"></canvas>
+      </div>
+      <div class="controls">
+        <label>推力 F <input type="range" id="f1" min="1" max="40" value="15"> N</label>
+        <label>距離 s <input type="range" id="s1" min="1" max="10" value="5"> m</label>
+        <label>時間 t <input type="range" id="t1" min="0.5" max="10" step="0.5" value="2"> s</label>
+        <button onclick="runSim1()">開始推動</button>
+      </div>
+      <div id="out1" class="result">設定數值後，點擊「開始推動」觀察箱子移動與計算結果。</div>
+    </div>
+
+    <div class="card quiz-card">
+      <h3>📝 小練習（功與功率）</h3>
+      <div id="quiz0"></div>
+    </div>
+  </section>
+
+  <!-- ==================== 2. 動能與位能 ==================== -->
+  <section class="tab-content" id="tab1">
+    <div class="card">
+      <h2>2. 動能與位能</h2>
+      <p><strong>動能</strong>：物體因為「在運動」而具有的能量。動能與質量、速度的平方成正比。</p>
+      <div class="formula">Eₖ = ½mv²<span>（m：質量 kg，v：速度 m/s）</span></div>
+      <ul>
+        <li>速度越快，動能大幅增加（速度加倍，動能變 4 倍）。</li>
+        <li>質量越大，在相同速度下動能也越大。</li>
+      </ul>
+      <p><strong>重力位能</strong>：物體因為「高度」而儲存的能量。</p>
+      <div class="formula">Eₚ = mgh<span>（m：質量 kg，g：重力加速度 ≈ 9.8 m/s²，h：高度 m）</span></div>
+      <ul>
+        <li>高度越高，位能越大。</li>
+        <li>國中計算常近似 g = 10 m/s² 以利估算。</li>
+      </ul>
+      <div class="tip">💡 能量轉換：物體下落時，位能減少、動能增加；往上拋時，動能減少、位能增加。</div>
+    </div>
+
+    <div class="card">
+      <h3>🔧 互動模擬：自由下落能量轉換</h3>
+      <div class="sim-area">
+        <canvas id="sim2" width="560" height="300"></canvas>
+      </div>
+      <div class="controls">
+        <label>質量 m <input type="range" id="m2" min="1" max="10" value="2"> kg</label>
+        <label>高度 h <input type="range" id="h2" min="5" max="50" value="20"> m</label>
+        <button onclick="runSim2()">釋放小球</button>
+      </div>
+      <div id="out2" class="result" style="text-align:left;">設定質量與高度，點擊「釋放小球」觀察位能與動能的轉換。</div>
+    </div>
+
+    <div class="card quiz-card">
+      <h3>📝 小練習（動能與位能）</h3>
+      <div id="quiz1"></div>
+    </div>
+  </section>
+
+  <!-- ==================== 3. 能量守恆定律與能源 ==================== -->
+  <section class="tab-content" id="tab2">
+    <div class="card">
+      <h2>3. 能量守恆定律與能源</h2>
+      <p><strong>能量守恆定律</strong>：能量不會憑空產生，也不會消失，它只能從一種形式轉換成另一種形式，或從一個物體轉移到另一個物體，總能量保持不變。</p>
+      <div class="formula">總能量 = 不變</div>
+      <ul>
+        <li>擺鐘：位能 ↔ 動能不斷轉換，總機械能約不變（忽略空氣阻力）。</li>
+        <li>發電：機械能 → 電能；電燈泡：電能 → 光能 + 熱能。</li>
+        <li>汽車引擎：化學能（汽油）→ 熱能 → 機械能。</li>
+      </ul>
+      <h3>能源分類</h3>
+      <div class="grid2">
+        <div class="energy-card" onclick="alert('可再生能源：大自然不斷更新，可持續使用。例如太陽能、風力、水力、生物質能、地熱能。')">
+          <span class="badge renewable">可再生能源</span>
+          <h4>太陽能、風力、水力</h4>
+          <p>取之不盡，對環境較友善。</p>
+        </div>
+        <div class="energy-card" onclick="alert('不可再生能源：地球儲量有限，使用後難以短期再生。例如石油、煤炭、天然氣、核能。')">
+          <span class="badge nonrenewable">不可再生能源</span>
+          <h4>石油、煤炭、天然氣、核能</h4>
+          <p>儲量有限，燃燒會排放二氧化碳。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>🔧 互動模擬：擺鐘與能量守恆</h3>
+      <div class="sim-area">
+        <canvas id="sim3" width="560" height="300"></canvas>
+      </div>
+      <div class="controls">
+        <label>擺長 L <input type="range" id="L3" min="100" max="220" value="160"> px</label>
+        <label>初始角度 <input type="range" id="a3" min="15" max="75" value="50">°</label>
+        <button onclick="runSim3()">啟動擺鐘</button>
+      </div>
+      <div id="out3" class="result" style="text-align:left;">觀察擺鐘在最高點（位能最大）與最低點（動能最大）的變化，總能量約不變。</div>
+    </div>
+
+    <div class="card quiz-card">
+      <h3>📝 小練習（能量守恆與能源）</h3>
+      <div id="quiz2"></div>
+    </div>
+  </section>
+
+  <!-- ==================== 4. 簡單機械 ==================== -->
+  <section class="tab-content" id="tab3">
+    <div class="card">
+      <h2>4. 簡單機械</h2>
+      <p><strong>簡單機械</strong>可以幫我們省力、改變力的方向，或增加力的作用距離，但「做的功不會變多」。（能量守恆）</p>
+      <h3>槓桿原理</h3>
+      <p>槓桿由「支點、作用點、抗力點」組成。</p>
+      <div class="formula">F₁ × L₁ = F₂ × L₂<span>（作用力 × 作用力臂 = 抗力 × 阻臂）</span></div>
+      <ul>
+        <li><strong>省力槓桿</strong>：作用力臂 &gt; 阻臂（如鉗子、輪子）。</li>
+        <li><strong>等臂槓桿</strong>：作用力臂 = 阻臂（如天平）。</li>
+        <li><strong>費力槓桿</strong>：作用力臂 &lt; 阻臂（如眉毛夾、鎖喉鉗）。</li>
+      </ul>
+      <h3>滑輪</h3>
+      <ul>
+        <li><strong>固定滑輪</strong>：固定於支架，不省力，但可以改變力的方向。</li>
+        <li><strong>動滑輪</strong>：隨重物一起移動，理想情況下可省一半的力（機械利益約為 2）。</li>
+        <li><strong>滑輪組</strong>：固定滑輪與動滑輪組合，拉得的繩索越多，省力越多。</li>
+      </ul>
+      <div class="formula">機械利益 = 負重 ÷ 拉力</div>
+    </div>
+
+    <div class="card">
+      <h3>🔧 互動模擬：槓桿平衡計算</h3>
+      <div class="sim-area">
+        <canvas id="sim4" width="560" height="200"></canvas>
+      </div>
+      <div class="controls">
+        <label>支點位置 <input type="range" id="p4" min="10" max="90" value="40">（% 從左端）</label>
+        <label>重物 W₂ <input type="range" id="w4" min="20" max="200" step="10" value="100"> N</label>
+        <button onclick="runSim4()">計算平衡施力</button>
+      </div>
+      <div id="out4" class="result" style="text-align:left;">調整支點與重物，查看所需的作用力 F₁。</div>
+    </div>
+
+    <div class="card quiz-card">
+      <h3>📝 小練習（簡單機械）</h3>
+      <div id="quiz3"></div>
+    </div>
+  </section>
+
+  <!-- ==================== 5. 重點總整理 ==================== -->
+  <section class="tab-content" id="tab4">
+    <div class="card">
+      <h2>5. 重點總整理</h2>
+      <h3>📐 公式速查表</h3>
+      <table>
+        <tr><th>概念</th><th>公式</th><th>單位</th><th>說明</th></tr>
+        <tr><td>功</td><td>W = F × s</td><td>焦耳 (J)</td><td>力與位移同方向時做功</td></tr>
+        <tr><td>功率</td><td>P = W ÷ t</td><td>瓦特 (W)</td><td>1 W = 1 J/s</td></tr>
+        <tr><td>動能</td><td>Eₖ = ½mv²</td><td>焦耳 (J)</td><td>與質量及速度平方成正比</td></tr>
+        <tr><td>重力位能</td><td>Eₚ = mgh</td><td>焦耳 (J)</td><td>g ≈ 9.8 m/s²（國中常以 10 估算）</td></tr>
+        <tr><td>槓桿原理</td><td>F₁ × L₁ = F₂ × L₂</td><td>—</td><td>作用力 × 作用力臂 = 抗力 × 阻臂</td></tr>
+        <tr><td>機械利益</td><td>機械利益 = 負重 ÷ 拉力</td><td>—</td><td>越大代表越省力</td></tr>
+      </table>
+      <h3>📏 單位速查</h3>
+      <table>
+        <tr><th>物理量</th><th>單位</th><th>符號</th><th>換算</th></tr>
+        <tr><td>力</td><td>牛頓</td><td>N</td><td>1 N = 1 kg·m/s²</td></tr>
+        <tr><td>功 / 能量</td><td>焦耳</td><td>J</td><td>1 J = 1 N·m</td></tr>
+        <tr><td>功率</td><td>瓦特</td><td>W</td><td>1 W = 1 J/s</td></tr>
+        <tr><td>質量</td><td>公斤</td><td>kg</td><td>—</td></tr>
+        <tr><td>距離 / 高度</td><td>米</td><td>m</td><td>—</td></tr>
+      </table>
+      <div class="note"><strong>常見考題陷阱：</strong>沒有位移就不做功；力垂直於運動方向不做功；動能與速度「平方」成正比；滑輪不改變做的總功，只改變力與距離；能量不會消失，只會轉換。</div>
+    </div>
+
+    <div class="card quiz-card">
+      <h3>📝 綜合自評測驗（10 題）</h3>
+      <div id="quiz4"></div>
+    </div>
+  </section>
+
+</div>
+
+<footer class="footer">
+  <p><b>國中九年級自然科【功與能】單元教學網站</b> — 翰林版課綱對應</p>
+  <p>本網站為單一自包含 HTML 檔，所有圖片皆內嵌於檔中，可離線使用，不需網路連線。</p>
+  <p style="margin-top:0.5rem; font-size:0.85rem; opacity:0.8;">教學內容依據國中自然課綱整理，適合課堂輔導與課後複習。</p>
+</footer>
+
+<script>
+  /* ---------- 分頁切換 ---------- */
+  window._animId = null;
+  function stopAnims(){
+    if(window._animId){ cancelAnimationFrame(window._animId); window._animId = null; }
+  }
+  function openTab(idx, btn){
+    stopAnims();
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab'+idx).classList.add('active');
+  }
+
+  /* ---------- 練習題資料 ---------- */
+  const QUIZ_DATA = {
+    0: [
+      { q: "下列何種情況<strong>不會</strong>對物體做功？", opts: ["舉起書本", "推動箱子移動 2 米", "用力推牆壁但牆壁沒動", "拉長彈簧"], ans: 2, expl: "做功必須有「位移」。牆壁沒有移動，所以沒有做功。" },
+      { q: "功的國際單位是？", opts: ["瓦特 (W)", "焦耳 (J)", "牛頓 (N)", "米 (m)"], ans: 1, expl: "功與能量的單位都是焦耳 (J)；瓦特 (W) 是功率的單位。" },
+      { q: "用 50 N 的力將箱子推動 4 米，做了多少功？", opts: ["12.5 J", "20 J", "200 J", "54 J"], ans: 2, expl: "W = F × s = 50 N × 4 m = 200 J。" }
+    ],
+    1: [
+      { q: "動能的公式是？", opts: ["mv²", "½mv²", "mgh", "½mv"], ans: 1, expl: "動能 Eₖ = ½mv²，與質量和速度平方成正比。" },
+      { q: "質量 2 kg 的物體舉高 3 米，重力位能約為多少？（取 g = 10 m/s²）", opts: ["6 J", "20 J", "60 J", "120 J"], ans: 2, expl: "Eₚ = mgh = 2 × 10 × 3 = 60 J。" },
+      { q: "物體自由下落時，其重力位能會？", opts: ["增加", "減少並轉變為動能", "不變", "消失"], ans: 1, expl: "下落高度降低，位能轉換成動能，總機械能約不變。" }
+    ],
+    2: [
+      { q: "能量守恆定律指出？", opts: ["能量會消失", "能量會憑空產生", "能量總量不變，只轉換形式", "能量不能轉移"], ans: 2, expl: "能量不會產生也不會消失，只能轉換形式或在物體間轉移。" },
+      { q: "下列哪一項是不可再生能源？", opts: ["太陽能", "風力發電", "石油", "水力發電"], ans: 2, expl: "石油是化石燃料，儲量有限，屬於不可再生能源。" },
+      { q: "擺鐘擺到最低點時，動能？", opts: ["最小", "最大", "為零", "等於零"], ans: 1, expl: "最低點速度最大，所以動能最大；此時位能最小。" }
+    ],
+    3: [
+      { q: "槓桿平衡的原理公式是？", opts: ["F₁ + L₁ = F₂ + L₂", "F₁ × L₁ = F₂ × L₂", "F₁ / L₁ = F₂ × L₂", "F₁ × L₂ = F₂ × L₁"], ans: 1, expl: "作用力 × 作用力臂 = 抗力 × 阻臂，即 F₁ × L₁ = F₂ × L₂。" },
+      { q: "固定滑輪的主要作用是？", opts: ["省力", "改變力的方向", "機械利益為 2", "不需要拉力"], ans: 1, expl: "固定滑輪不省力，但可以改變施力方向。" },
+      { q: "一個滑輪組含有 2 個動滑輪，理想機械利益約為？", opts: ["2", "4", "6", "8"], ans: 1, expl: "每個動滑輪提供 2 倍機械利益，2 個動滑輪理想機械利益約為 2 × 2 = 4。" }
+    ],
+    4: [
+      { q: "在 W = F × s 公式中，s 代表？", opts: ["時間", "位移", "速度", "力"], ans: 1, expl: "s 代表物體沿力的方向發生的位移。" },
+      { q: "1 瓦特 (W) 等於？", opts: ["1 J/s", "1 J·s", "1 N/m", "1 kg·m/s"], ans: 0, expl: "功率 = 功 ÷ 時間，1 W = 1 J/s。" },
+      { q: "動能與速度的關係是？", opts: ["成正比", "成反比", "與速度平方成正比", "無關"], ans: 2, expl: "Eₖ = ½mv²，速度加倍時動能變為 4 倍。" },
+      { q: "重力加速度 g 約為？", opts: ["9.8 m/s²", "10 m/s²", "9.8 N/kg", "以上皆可"], ans: 3, expl: "g 約等於 9.8 m/s²，也可寫成 9.8 N/kg；國中估算常取 10。" },
+      { q: "能量守恆定律的正確敘述是？", opts: ["能量會被用完", "總能量不變，只轉換形式", "動能一定大於位能", "能量只能轉移不能轉換"], ans: 1, expl: "能量不會產生或消失，只能轉換或轉移，總量不變。" },
+      { q: "槓桿公式 F₁ × L₁ = F₂ × L₂ 中，F₁ 是？", opts: ["抗力", "作用力", "重力", "摩擦力"], ans: 1, expl: "F₁ 為作用於作用點的施力（作用力）。" },
+      { q: "動滑輪的作用是？", opts: ["僅改變方向", "可省力（理想機械利益約為 2）", "增加做的功", "完全不耗力"], ans: 1, expl: "動滑輪可將所需拉力減半，屬於省力簡單機械。" },
+      { q: "太陽能屬於？", opts: ["不可再生能源", "可再生能源", "化石燃料", "核能"], ans: 1, expl: "太陽能來源不斷，屬於可再生能源。" },
+      { q: "忽略空氣阻力，物體自由下落時其機械能？", opts: ["持續增加", "持續減少", "保持不變", "全部轉為熱能"], ans: 2, expl: "位能與動能互相轉換，但總機械能保持不變。" },
+      { q: "若 5 秒內做了 100 J 的功，功率為多少？", opts: ["20 W", "500 W", "100 W", "5 W"], ans: 0, expl: "P = W ÷ t = 100 ÷ 5 = 20 W。" }
+    ]
+  };
+
+  function renderQuiz(tabIdx){
+    const box = document.getElementById('quiz'+tabIdx);
+    if(!box) return;
+    const data = QUIZ_DATA[tabIdx];
+    let html = '';
+    data.forEach((q,i)=>{
+      html += '<div class="question"><strong>Q'+(i+1)+'. '+q.q+'</strong><div class="options">';
+      q.opts.forEach((opt,j)=>{
+        html += '<label><input type="radio" name="q'+tabIdx+i+'" value="'+j+'"> '+opt+'</label>';
+      });
+      html += '</div><div class="feedback" id="fb'+tabIdx+i+'"></div></div>';
+    });
+    html += '<div style="margin-top:1rem"><button class="btn-check" onclick="checkQuiz('+tabIdx+')">檢查答案</button> <button class="btn-reset" onclick="resetQuiz('+tabIdx+')">重做</button></div>';
+    html += '<div id="score'+tabIdx+'" class="score-box"></div>';
+    box.innerHTML = html;
+  }
+
+  function checkQuiz(tabIdx){
+    const data = QUIZ_DATA[tabIdx];
+    let score = 0;
+    data.forEach((q,i)=>{
+      const radios = document.getElementsByName('q'+tabIdx+i);
+      let selected = -1;
+      radios.forEach((r,j)=>{ if(r.checked) selected = j; });
+      const fb = document.getElementById('fb'+tabIdx+i);
+      if(selected === q.ans){
+        fb.className = 'feedback correct';
+        fb.textContent = '✓ 正確！ ' + q.expl;
+        score++;
+      } else if(selected === -1){
+        fb.className = 'feedback wrong';
+        fb.textContent = '⚠ 未作答。正確答案：' + q.opts[q.ans] + (q.expl ? '（'+q.expl+'）' : '');
+      } else {
+        fb.className = 'feedback wrong';
+        fb.textContent = '✗ 錯誤。正確答案：' + q.opts[q.ans] + (q.expl ? '（'+q.expl+'）' : '');
+      }
+    });
+    document.getElementById('score'+tabIdx).textContent = '🎯 你的得分：'+score+' / '+data.length;
+  }
+
+  function resetQuiz(tabIdx){
+    const data = QUIZ_DATA[tabIdx];
+    data.forEach((_,i)=>{
+      const radios = document.getElementsByName('q'+tabIdx+i);
+      radios.forEach(r=>r.checked=false);
+      const fb = document.getElementById('fb'+tabIdx+i);
+      if(fb){ fb.className='feedback'; fb.textContent=''; }
+    });
+    document.getElementById('score'+tabIdx).textContent='';
+  }
+
+  /* ---------- 模擬 1：推箱子（功與功率） ---------- */
+  function runSim1(){
+    const F = parseFloat(document.getElementById('f1').value)||0;
+    const S = parseFloat(document.getElementById('s1').value)||0;
+    const T = parseFloat(document.getElementById('t1').value)||0.5;
+    const cv = document.getElementById('sim1');
+    const ctx = cv.getContext('2d');
+    const W = F*S;
+    const P = W/T;
+    document.getElementById('out1').innerHTML = '做功 W = F × s = '+F+' × '+S+' = <strong>'+W+' J</strong><br>功率 P = W ÷ t = '+W+' ÷ '+T+' = <strong>'+P.toFixed(2)+' W</strong>';
+    ctx.clearRect(0,0,cv.width,cv.height);
+    ctx.strokeStyle='#95a5a6'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(40,175); ctx.lineTo(520,175); ctx.stroke();
+    const boxW=60, boxH=50, startX=80, scale=40, targetX=startX+S*scale;
+    let t0=null;
+    function anim(ts){
+      if(!t0) t0=ts;
+      const prog=Math.min((ts-t0)/1100,1);
+      const cx=startX+(targetX-startX)*prog;
+      ctx.clearRect(0,0,cv.width,cv.height);
+      ctx.strokeStyle='#95a5a6'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(40,175); ctx.lineTo(520,175); ctx.stroke();
+      ctx.fillStyle='#27ae60'; ctx.beginPath(); ctx.moveTo(110,100); ctx.lineTo(40,100); ctx.lineTo(50,90); ctx.lineTo(50,110); ctx.fill();
+      ctx.fillStyle='#27ae60'; ctx.font='16px sans-serif'; ctx.fillText('F', 60, 95);
+      ctx.fillStyle='#e67e22'; ctx.strokeStyle='#c0392b'; ctx.lineWidth=2;
+      ctx.fillRect(cx,125,boxW,boxH); ctx.strokeRect(cx,125,boxW,boxH);
+      ctx.fillStyle='#333'; ctx.font='14px sans-serif'; ctx.fillText('箱子', cx+boxW/2-14, 118);
+      ctx.strokeStyle='#3498db'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(startX,185); ctx.lineTo(targetX,185); ctx.stroke();
+      ctx.fillStyle='#3498db'; ctx.beginPath(); ctx.moveTo(targetX,180); ctx.lineTo(targetX,190); ctx.lineTo(targetX-7,187); ctx.fill();
+      ctx.fillStyle='#3498db'; ctx.font='14px sans-serif'; ctx.fillText('s', (startX+targetX)/2-6, 180);
+      if(prog<1) window._animId=requestAnimationFrame(anim);
+    }
+    window._animId=requestAnimationFrame(anim);
+  }
+
+  /* ---------- 模擬 2：自由下落（動能與位能） ---------- */
+  function runSim2(){
+    const m = parseFloat(document.getElementById('m2').value)||2;
+    const H = parseFloat(document.getElementById('h2').value)||20;
+    const cv = document.getElementById('sim2');
+    const ctx = cv.getContext('2d');
+    const g = 9.8;
+    const pxPerMeter = 4.2;
+    const groundY = 260;
+    const startY = groundY - H*pxPerMeter;
+    const r = 14;
+    let t0=null, ended=false;
+    function anim(ts){
+      if(!t0) t0=ts;
+      const t = (ts-t0)/1000;
+      const yM = H - 0.5*g*t*t;
+      let yPx = groundY - yM*pxPerMeter;
+      if(yM<=0){ yPx=groundY; if(!ended){ ended=true; showRes2(m,H,g,t); } }
+      const v = g*t;
+      const Ek = 0.5*m*v*v;
+      const Ep = m*g*Math.max(yM,0);
+      const Etot = Ek+Ep;
+      document.getElementById('out2').innerHTML =
+        '時間 t = '+t.toFixed(2)+' s<br>'+
+        '高度 h = '+Math.max(yM,0).toFixed(2)+' m &nbsp;|&nbsp; 速度 v = '+v.toFixed(2)+' m/s<br>'+
+        '動能 Eₖ = '+Ek.toFixed(1)+' J &nbsp;|&nbsp; 位能 Eₚ = '+Ep.toFixed(1)+' J<br>'+
+        '總機械能 ≈ '+Etot.toFixed(1)+' J (約不變)';
+      ctx.clearRect(0,0,cv.width,cv.height);
+      ctx.strokeStyle='#95a5a6'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(60,groundY); ctx.lineTo(500,groundY); ctx.stroke();
+      ctx.fillStyle='#bdc3c7'; ctx.fillRect(340,60,20,groundY-60);
+      ctx.fillStyle='#e74c3c'; ctx.beginPath(); ctx.arc(350,yPx,r,0,Math.PI*2); ctx.fill(); ctx.strokeStyle='#c0392b'; ctx.lineWidth=2; ctx.stroke();
+      ctx.fillStyle='#333'; ctx.font='13px sans-serif'; ctx.fillText('質量 '+m+' kg', 350-r/2-10, yPx-r-8);
+      if(!ended) window._animId=requestAnimationFrame(anim);
+    }
+    window._animId=requestAnimationFrame(anim);
+  }
+  function showRes2(m,H,g,t){
+    const impactV = Math.sqrt(2*g*H);
+    const tfall = Math.sqrt(2*H/g);
+    document.getElementById('out2').innerHTML += '<br><strong>落地：</strong>時間約 '+tfall.toFixed(2)+' s，撞擊速度約 '+impactV.toFixed(1)+' m/s。';
+  }
+
+  /* ---------- 模擬 3：擺鐘（能量守恆） ---------- */
+  function runSim3(){
+    const L = parseFloat(document.getElementById('L3').value)||160;
+    const ang0 = parseFloat(document.getElementById('a3').value)||50;
+    const cv = document.getElementById('sim3');
+    const ctx = cv.getContext('2d');
+    const cx=280, cy=70;
+    const theta0 = ang0*Math.PI/180;
+    const omega = 1.35; // 角頻率（畫面單位，供視覺使用）
+    const m = 1.5, gscale = 0.012; // 相對能量比例常數
+    let t0=null;
+    function anim(ts){
+      if(!t0) t0=ts;
+      const t = (ts-t0)/1000;
+      const th = theta0*Math.cos(omega*t);
+      const x = cx + L*Math.sin(th);
+      const y = cy + L*Math.cos(th);
+      const hRel = L*(1-Math.cos(th)); // 相對最低點高度
+      const Ep = m*gscale*hRel;
+      const v = L*theta0*omega*Math.abs(Math.sin(omega*t));
+      const Ek = 0.5*m*v*v*0.03; // 縮放以符合畫面
+      const Etot = Ep+Ek;
+      document.getElementById('out3').innerHTML =
+        '相對位能 Eₚ ≈ '+Ep.toFixed(2)+' &nbsp;|&nbsp; 動能 Eₖ ≈ '+Ek.toFixed(2)+'<br>'+
+        '總機械能 ≈ '+Etot.toFixed(2)+'（約不變）<br>'+
+        (Math.abs(th)<0.03?'⚡ 最低點：動能最大，位能最小':(Math.abs(Math.abs(th)-theta0)<0.05?'🔝 最高點：位能最大，動能為零':'🔄 擺動中'));
+      ctx.clearRect(0,0,cv.width,cv.height);
+      ctx.strokeStyle='#7f8c8d'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(x,y); ctx.stroke();
+      ctx.fillStyle='#34495e'; ctx.beginPath(); ctx.arc(cx,cy,5,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#e67e22'; ctx.beginPath(); ctx.arc(x,y,16,0,Math.PI*2); ctx.fill(); ctx.strokeStyle='#c0392b'; ctx.lineWidth=2; ctx.stroke();
+      ctx.fillStyle='#333'; ctx.font='13px sans-serif'; ctx.fillText('擺球', x-14, y-22);
+      window._animId=requestAnimationFrame(anim);
+    }
+    window._animId=requestAnimationFrame(anim);
+  }
+
+  /* ---------- 模擬 4：槓桿平衡 ---------- */
+  function runSim4(){
+    const p = parseFloat(document.getElementById('p4').value)||40;
+    const W2 = parseFloat(document.getElementById('w4').value)||100;
+    const cv = document.getElementById('sim4');
+    const ctx = cv.getContext('2d');
+    const left=60, right=500, y=120;
+    const xp = left+(right-left)*p/100;
+    const L1 = right-xp; // 作用力臂（右端施力）
+    const L2 = xp-left;  // 阻臂（左端重物）
+    const F1 = W2*L2/L1;
+    document.getElementById('out4').innerHTML =
+      '支點位置：'+p.toFixed(0)+'% &nbsp;|&nbsp; 作用力臂 L₁ = '+L1.toFixed(0)+' px &nbsp;|&nbsp; 阻臂 L₂ = '+L2.toFixed(0)+' px<br>'+
+      '所需作用力 F₁ = W₂×L₂÷L₁ = '+W2.toFixed(0)+'×'+L2.toFixed(0)+'÷'+L1.toFixed(0)+' = <strong>'+F1.toFixed(1)+' N</strong><br>'+
+      (p<50?'💡 支點靠近重物，較省力（省力槓桿）':(p>50?'💡 支點遠離重物，較費力（費力槓桿）':'⚖️ 等臂槓桿，作用力等於抗力'));
+    ctx.clearRect(0,0,cv.width,cv.height);
+    ctx.strokeStyle='#7f8c8d'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(left,y); ctx.lineTo(right,y); ctx.stroke();
+    ctx.fillStyle='#34495e'; ctx.beginPath(); ctx.moveTo(xp,y-18); ctx.lineTo(xp-12,y+14); ctx.lineTo(xp+12,y+14); ctx.fill();
+    ctx.fillStyle='#e74c3c'; ctx.fillRect(left-14,y-22,28,28); ctx.strokeStyle='#c0392b'; ctx.lineWidth=2; ctx.strokeRect(left-14,y-22,28,28);
+    ctx.fillStyle='#333'; ctx.font='13px sans-serif'; ctx.fillText('W₂ = '+W2+' N', left-18, y-30);
+    ctx.fillStyle='#27ae60'; ctx.beginPath(); ctx.moveTo(right,y-6); ctx.lineTo(right+26,y-6); ctx.lineTo(right+20,y-14); ctx.lineTo(right+26,y-6); ctx.lineTo(right+20,y+2); ctx.fill();
+    ctx.fillStyle='#27ae60'; ctx.font='13px sans-serif'; ctx.fillText('F₁ ≈ '+F1.toFixed(1)+' N', right+6, y-18);
+    ctx.fillStyle='#333'; ctx.font='12px sans-serif'; ctx.fillText('支點', xp-10, y+32);
+  }
+
+  /* ---------- 初始化 ---------- */
+  document.addEventListener('DOMContentLoaded', function(){
+    for(let i=0;i<5;i++) renderQuiz(i);
+  });
+</script>
+
+</body>
+</html>
